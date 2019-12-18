@@ -179,7 +179,7 @@ function integrate_field_line(p0, dl, nmax, color1, color2) {
 //     field_lines.add(line);
 //   }
 // }
-var N = 10000;
+var N = 8000;
 var p0s = [];
 
 function gen_p0() {
@@ -198,7 +198,7 @@ gen_p0();
 function add_all_field_lines() {
   var field_lines = new THREE.Group();
   for (var i = 0; i < p0s.length; i++) {
-    var line = integrate_field_line(p0s[i], 0.02, 3000, new THREE.Color("limegreen"),
+    var line = integrate_field_line(p0s[i], 0.03, 3000, new THREE.Color("limegreen"),
                                     new THREE.Color("skyblue"));
     // console.log("adding", i, line);
   }
@@ -260,16 +260,16 @@ function update_fieldlines() {
 }
 
 const gui = new GUI();
-gui.add(conf, "px", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "py", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "pz", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q11", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q12", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q13", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q22", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q23", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "min_length", 1.0, 40.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "LC", 10.0, 30.0).step(0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "px", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "py", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "pz", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "q11", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "q12", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "q13", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "q22", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "q23", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "min_length", 1.0, 40.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "LC", 10.0, 30.0, 0.01).listen().onFinishChange(update_fieldlines);
 gui.add(conf, "show_closed").listen();
 conf.clear = function() {
   setTimeout(remove_all_field_lines, 0, 5000);
