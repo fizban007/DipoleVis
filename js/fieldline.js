@@ -76,6 +76,7 @@ var Config = function () {
   this.q13 = 1.0;
   this.q22 = 0.0;
   this.q23 = 0.0;
+  this.min_length = 3.0;
 };
 var conf = new Config();
 
@@ -112,7 +113,7 @@ function integrate_field_line(p0, dl, nmax, color1, color2) {
     len += dl;
   }
   // console.log(positions);
-  if (len >= 3.0) {
+  if (len >= conf.min_length) {
     g.setPositions(positions);
     g.attributes.position.needsUpdate = true;
     var line = new Line2(g, new LineMaterial({
@@ -250,6 +251,7 @@ gui.add(conf, "q12", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "q13", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "q22", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "q23", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "min_length", 1.0, 20.0).step(0.01).listen().onChange(update_fieldlines);
 conf.clear = function() {
   setTimeout(remove_all_field_lines, 0, 5000);
 }
