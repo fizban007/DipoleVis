@@ -77,6 +77,7 @@ var Config = function () {
   this.q22 = 0.0;
   this.q23 = 0.0;
   this.min_length = 3.0;
+  this.LC = 20.0;
 };
 var conf = new Config();
 
@@ -104,7 +105,7 @@ function integrate_field_line(p0, dl, nmax, color1, color2) {
     if (p.lengthSq() < 1.0) {
       break;
     }
-    if (p.x*p.x+p.y*p.y > 400.0) {
+    if (p.x*p.x+p.y*p.y > conf.LC * conf.LC) {
       open = true;
       break;
     }
@@ -252,6 +253,7 @@ gui.add(conf, "q13", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "q22", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "q23", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "min_length", 1.0, 20.0).step(0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "LC", 10.0, 30.0).step(0.01).listen().onChange(update_fieldlines);
 conf.clear = function() {
   setTimeout(remove_all_field_lines, 0, 5000);
 }
