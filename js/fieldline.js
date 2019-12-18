@@ -70,12 +70,12 @@ function quadrupole_field(q11, q12, q13, q22, q23, x, y, z) {
 var Config = function () {
   this.px = 0.0;
   this.py = 0.3;
-  this.pz = 0.1;
-  this.q11 = 0.0;
-  this.q12 = 0.6;
-  this.q13 = 0.4;
+  this.pz = 0.03;
+  this.q11 = -0.6;
+  this.q12 = 0.0;
+  this.q13 = 0.0;
   this.q22 = 0.0;
-  this.q23 = 0.0;
+  this.q23 = -0.7;
   this.min_length = 15.0;
   this.LC = 20.0;
   this.show_closed = true;
@@ -260,16 +260,16 @@ function update_fieldlines() {
 }
 
 const gui = new GUI();
-gui.add(conf, "px", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
-gui.add(conf, "py", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
-gui.add(conf, "pz", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
-gui.add(conf, "q11", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
-gui.add(conf, "q12", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
-gui.add(conf, "q13", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
-gui.add(conf, "q22", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
-gui.add(conf, "q23", -1.0, 1.0, 0.01).listen().onFinishChange(update_fieldlines);
-gui.add(conf, "min_length", 1.0, 40.0, 0.01).listen().onFinishChange(update_fieldlines);
-gui.add(conf, "LC", 10.0, 30.0, 0.01).listen().onFinishChange(update_fieldlines);
+gui.add(conf, "px", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "py", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "pz", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "q11", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "q12", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "q13", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "q22", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "q23", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "min_length", 1.0, 40.0, 0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "LC", 10.0, 30.0, 0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "show_closed").listen();
 conf.clear = function() {
   setTimeout(remove_all_field_lines, 0, 5000);
