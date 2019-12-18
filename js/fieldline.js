@@ -158,13 +158,19 @@ function integrate_field_line(p0, dl, nmax, color) {
 // }
 var N = 2000;
 var p0s = [];
-for (var i = 0; i < N; i++) {
-  var phi = 2.0 * Math.PI * Math.random();
-  var u = 2.0 * Math.random() - 1.0;
-  var v = Math.sqrt(1.0 - u*u);
-  var p0 = new THREE.Vector3(v * Math.cos(phi), v * Math.sin(phi), u);
-  p0s.push(p0);
+
+function gen_p0() {
+  p0s = [];
+  for (var i = 0; i < N; i++) {
+    var phi = 2.0 * Math.PI * Math.random();
+    var u = 2.0 * Math.random() - 1.0;
+    var v = Math.sqrt(1.0 - u*u);
+    var p0 = new THREE.Vector3(v * Math.cos(phi), v * Math.sin(phi), u);
+    p0s.push(p0);
+  }
 }
+
+gen_p0();
 
 function add_all_field_lines() {
   var field_lines = new THREE.Group();
@@ -236,8 +242,18 @@ conf.draw = function() {
   add_all_field_lines();
   // setTimeout(add_all_field_lines, 0, 5000);
 }
+conf.randomize = function() {
+  remove_all_field_lines();
+  gen_p0();
+  add_all_field_lines();
+}
+conf.resetView = function() {
+  controls.reset();
+}
 gui.add(conf, "clear");
 gui.add(conf, "draw");
+gui.add(conf, "randomize");
+gui.add(conf, "resetView");
 
 var axis = new THREE.Geometry();
 axis.vertices.push(new THREE.Vector3(0, 0, -100));
