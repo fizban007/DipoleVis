@@ -53,37 +53,51 @@ function dipole_field(px, py, pz, x, y, z) {
                            (3.0*z*(px*x+py*y)-pz*(x*x+y*y-2.0*z*z))/r5);
 }
 
-// function quadrupole_field(q1, q2, q3, q4, q5, x, y, z) {
-//   return new THREE.Vector3();
-// }
+function quadrupole_field(q11, q12, q13, q22, q23, x, y, z) {
+  var r = Math.sqrt(x*x + y*y + z*z);
+  var r2 = r*r;
+  var r7 = r2*r2*r2*r;
+  return new THREE.Vector3(
+    (-2.0 * (q11*x + q12*y + q13*z) * r2 + 5.0*x*
+     (q11*x*x + 2.0*q12*x*y + q22*y*y + 2.0*(q13*x + q23*y)*z - (q11+q22)*z*z)) / r7,
+    (-2.0 * (q12*x + q22*y + q23*z) * r2 + 5.0*y*
+     (q11*x*x + 2.0*q12*x*y + q22*y*y + 2.0*(q13*x + q23*y)*z - (q11+q22)*z*z)) / r7,
+    (-2.0 * (q13*x + q23*y) * (x*x + y*y) +
+     ((7.0*q11 + 2.0*q22)*x*x + 10.0*q12*x*y + (2.0*q11 + 7.0*q22)*y*y)*z +
+     8.0*(q13*x + q23*y)*z*z - 3.0*(q11 + q22)*z*z*z) / r7);
+}
+
 var Config = function () {
   this.px = 0.0;
-  this.py = 0.0;
-  this.pz = 1.0;
-  this.q1 = 0.0;
-  this.q2 = 0.0;
-  this.q3 = 0.0;
-  this.q4 = 0.0;
-  this.q5 = 0.0;
+  this.py = 0.3;
+  this.pz = 0.1;
+  this.q11 = 0.0;
+  this.q12 = 1.0;
+  this.q13 = 1.0;
+  this.q22 = 0.0;
+  this.q23 = 0.0;
 };
 var conf = new Config();
 
-function integrate_field_line(p0, dl, nmax, color) {
+function integrate_field_line(p0, dl, nmax, color1, color2) {
   var positions = [];
   positions.push(p0.x, p0.y, p0.z);
   var p = new THREE.Vector3();
   p.copy(p0);
   var f0 = dipole_field(conf.px, conf.py, conf.pz, p.x, p.y, p.z);
+  f0.add(quadrupole_field(conf.q11, conf.q12, conf.q13, conf.q22, conf.q23, p.x, p.y, p.z));
+  // console.log(f0);
   var sign = 1.0;
   if (f0.dot(p) < 0.0) {
     sign = -1.0;
   }
   // console.log("p0 is", p0);
   var g = new LineGeometry();
-  var num = 1;
+  var len = dl;
   var open = false;
   for (var i = 0; i < nmax; i++) {
     var f = dipole_field(conf.px, conf.py, conf.pz, p.x, p.y, p.z);
+    f.add(quadrupole_field(conf.q11, conf.q12, conf.q13, conf.q22, conf.q23, p.x, p.y, p.z));
     f.normalize();
     p.addScaledVector(f, dl * sign);
     if (p.lengthSq() < 1.0) {
@@ -95,15 +109,15 @@ function integrate_field_line(p0, dl, nmax, color) {
     }
     // g.vertices.push(p);
     positions.push(p.x, p.y, p.z);
-    num += 1;
+    len += dl;
   }
   // console.log(positions);
-  if (open) {
+  if (len >= 3.0) {
     g.setPositions(positions);
     g.attributes.position.needsUpdate = true;
     var line = new Line2(g, new LineMaterial({
-      color: color,
-      linewidth: 0.002,
+      color: (open ? color1 : color2),
+      linewidth: 0.001,
       transparent: true,
     }));
  	  line.computeLineDistances();
@@ -156,7 +170,7 @@ function integrate_field_line(p0, dl, nmax, color) {
 //     field_lines.add(line);
 //   }
 // }
-var N = 2000;
+var N = 1000;
 var p0s = [];
 
 function gen_p0() {
@@ -175,7 +189,8 @@ gen_p0();
 function add_all_field_lines() {
   var field_lines = new THREE.Group();
   for (var i = 0; i < p0s.length; i++) {
-    var line = integrate_field_line(p0s[i], 0.1, 1000, new THREE.Color("limegreen"));
+    var line = integrate_field_line(p0s[i], 0.02, 3000, new THREE.Color("limegreen"),
+                                    new THREE.Color("skyblue"));
     // console.log("adding", i, line);
   }
   // console.log(field_lines);
@@ -230,11 +245,11 @@ const gui = new GUI();
 gui.add(conf, "px", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "py", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "pz", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q1", 0.0, 1.0).step(0.01).listen();
-gui.add(conf, "q2", 0.0, 1.0).step(0.01).listen();
-gui.add(conf, "q3", 0.0, 1.0).step(0.01).listen();
-gui.add(conf, "q4", 0.0, 1.0).step(0.01).listen();
-gui.add(conf, "q5", 0.0, 1.0).step(0.01).listen();
+gui.add(conf, "q11", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "q12", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "q13", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "q22", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "q23", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 conf.clear = function() {
   setTimeout(remove_all_field_lines, 0, 5000);
 }
