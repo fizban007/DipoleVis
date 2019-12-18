@@ -72,14 +72,18 @@ var Config = function () {
   this.py = 0.3;
   this.pz = 0.1;
   this.q11 = 0.0;
-  this.q12 = 1.0;
-  this.q13 = 1.0;
+  this.q12 = 0.6;
+  this.q13 = 0.4;
   this.q22 = 0.0;
   this.q23 = 0.0;
-  this.min_length = 3.0;
+  this.min_length = 15.0;
   this.LC = 20.0;
+  this.show_closed = true;
 };
 var conf = new Config();
+var open_lines = new THREE.Group();
+var closed_lines = new THREE.Group();
+closed_lines.visible = conf.show_closed;
 
 function integrate_field_line(p0, dl, nmax, color1, color2) {
   var positions = [];
@@ -119,12 +123,15 @@ function integrate_field_line(p0, dl, nmax, color1, color2) {
     g.attributes.position.needsUpdate = true;
     var line = new Line2(g, new LineMaterial({
       color: (open ? color1 : color2),
-      linewidth: 0.001,
+      linewidth: 0.0015,
       transparent: true,
     }));
  	  line.computeLineDistances();
     line.name = "line";
-    scene.add(line);
+    if (open)
+      open_lines.add(line);
+    else
+      closed_lines.add(line);
   }
 	// line.scale.set( 1, 1, 1 ); // arc.computeLineDistances();
   return line;
@@ -172,7 +179,7 @@ function integrate_field_line(p0, dl, nmax, color1, color2) {
 //     field_lines.add(line);
 //   }
 // }
-var N = 2000;
+var N = 10000;
 var p0s = [];
 
 function gen_p0() {
@@ -203,15 +210,22 @@ function add_all_field_lines() {
 add_all_field_lines();
 
 function remove_all_field_lines() {
-  for (var i = scene.children.length - 1; i >= 0; i--) {
-    if (scene.children[i].name == "line") {
-      var obj = scene.children[i];
-      // obj.material.dispose();
-      // obj.geometry.dispose();
-      scene.remove(obj);
+  for (var i = open_lines.children.length - 1; i >= 0; i--) {
+    if (open_lines.children[i].name == "line") {
+      var obj = open_lines.children[i];
+      obj.material.dispose();
+      obj.geometry.dispose();
+      open_lines.remove(obj);
     }
   }
-  // for(var i=0; i < field_lines.children.length; i++){
+  for (var i = closed_lines.children.length - 1; i >= 0; i--) {
+    if (closed_lines.children[i].name == "line") {
+      var obj = closed_lines.children[i];
+      obj.material.dispose();
+      obj.geometry.dispose();
+      closed_lines.remove(obj);
+    }
+  }
 }
 
 var g_cone = new THREE.ConeGeometry(1, 40, 32);
@@ -237,6 +251,8 @@ cone2.rotateX(-0.5 * Math.PI);
 var stats = new Stats();
 stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
 document.body.appendChild( stats.dom );
+scene.add(open_lines);
+scene.add(closed_lines);
 
 function update_fieldlines() {
   remove_all_field_lines();
@@ -252,8 +268,9 @@ gui.add(conf, "q12", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "q13", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "q22", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "q23", 0.0, 1.0).step(0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "min_length", 1.0, 20.0).step(0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "min_length", 1.0, 40.0).step(0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "LC", 10.0, 30.0).step(0.01).listen().onChange(update_fieldlines);
+gui.add(conf, "show_closed").listen();
 conf.clear = function() {
   setTimeout(remove_all_field_lines, 0, 5000);
 }
@@ -261,7 +278,7 @@ conf.draw = function() {
   add_all_field_lines();
   // setTimeout(add_all_field_lines, 0, 5000);
 }
-conf.randomize = function() {
+conf.reseed = function() {
   remove_all_field_lines();
   gen_p0();
   add_all_field_lines();
@@ -271,7 +288,7 @@ conf.resetView = function() {
 }
 gui.add(conf, "clear");
 gui.add(conf, "draw");
-gui.add(conf, "randomize");
+gui.add(conf, "reseed");
 gui.add(conf, "resetView");
 conf.look_x = function() {
   camera.position.set(80, 0, 0);
@@ -311,6 +328,7 @@ function animate() {
   // if(!instance.active || sample_defaults.paused) return;
 
   // field_lines.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), 0.003);
+  closed_lines.visible = conf.show_closed;
 
   renderer.render(scene, camera);
   stats.end();
