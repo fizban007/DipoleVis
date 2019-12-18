@@ -172,7 +172,7 @@ function integrate_field_line(p0, dl, nmax, color1, color2) {
 //     field_lines.add(line);
 //   }
 // }
-var N = 1000;
+var N = 2000;
 var p0s = [];
 
 function gen_p0() {
@@ -273,15 +273,30 @@ gui.add(conf, "clear");
 gui.add(conf, "draw");
 gui.add(conf, "randomize");
 gui.add(conf, "resetView");
+conf.look_x = function() {
+  camera.position.set(80, 0, 0);
+  controls.update();
+}
+gui.add(conf, "look_x");
+conf.look_y = function() {
+  camera.position.set(0, 80, 0);
+  controls.update();
+}
+gui.add(conf, "look_y");
+conf.look_z = function() {
+  camera.position.set(0, 0, 80);
+  controls.update();
+}
+gui.add(conf, "look_z");
 
 var axis = new THREE.Geometry();
 axis.vertices.push(new THREE.Vector3(0, 0, -100));
 axis.vertices.push(new THREE.Vector3(0, 0, 100));
-var axis_line = new THREE.Line(axis, new THREE.LineBasicMaterial({
+var z_line = new THREE.Line(axis, new THREE.LineBasicMaterial({
   color: 0x8080aa,
   linewidth: 2.5,
 }));
-scene.add(axis_line);
+scene.add(z_line);
 
 var directionalLight = new THREE.DirectionalLight(0xffffffff);
 directionalLight.position.set(0, 7, 0);
