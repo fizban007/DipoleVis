@@ -76,6 +76,9 @@ var Config = function () {
   this.q13 = 0.0;
   this.q22 = 0.0;
   this.q23 = -0.7;
+  this.q_offset_x = 0.0;
+  this.q_offset_y = 0.0;
+  this.q_offset_z = -0.35;
   this.min_length = 15.0;
   this.LC = 20.0;
   this.show_closed = true;
@@ -91,7 +94,8 @@ function integrate_field_line(p0, dl, nmax, color1, color2) {
   var p = new THREE.Vector3();
   p.copy(p0);
   var f0 = dipole_field(conf.px, conf.py, conf.pz, p.x, p.y, p.z);
-  f0.add(quadrupole_field(conf.q11, conf.q12, conf.q13, conf.q22, conf.q23, p.x, p.y, p.z));
+  f0.add(quadrupole_field(conf.q11, conf.q12, conf.q13, conf.q22, conf.q23,
+                          p.x - conf.q_offset_x, p.y - conf.q_offset_y, p.z - conf.q_offset_z));
   // console.log(f0);
   var sign = 1.0;
   if (f0.dot(p) < 0.0) {
@@ -103,7 +107,8 @@ function integrate_field_line(p0, dl, nmax, color1, color2) {
   var open = false;
   for (var i = 0; i < nmax; i++) {
     var f = dipole_field(conf.px, conf.py, conf.pz, p.x, p.y, p.z);
-    f.add(quadrupole_field(conf.q11, conf.q12, conf.q13, conf.q22, conf.q23, p.x, p.y, p.z));
+    f.add(quadrupole_field(conf.q11, conf.q12, conf.q13, conf.q22, conf.q23,
+                           p.x - conf.q_offset_x, p.y - conf.q_offset_y, p.z - conf.q_offset_z));
     f.normalize();
     p.addScaledVector(f, dl * sign);
     if (p.lengthSq() < 1.0) {
@@ -198,8 +203,8 @@ gen_p0();
 function add_all_field_lines() {
   var field_lines = new THREE.Group();
   for (var i = 0; i < p0s.length; i++) {
-    var line = integrate_field_line(p0s[i], 0.03, 3000, new THREE.Color("limegreen"),
-                                    new THREE.Color("skyblue"));
+    var line = integrate_field_line(p0s[i], 0.03, 3000, new THREE.Color("skyblue"),
+                                    new THREE.Color("limegreen"));
     // console.log("adding", i, line);
   }
   // console.log(field_lines);
@@ -260,14 +265,21 @@ function update_fieldlines() {
 }
 
 const gui = new GUI();
-gui.add(conf, "px", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "py", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "pz", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q11", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q12", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q13", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q22", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-gui.add(conf, "q23", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+var f_dipole = gui.addFolder("Dipole");
+f_dipole.add(conf, "px", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_dipole.add(conf, "py", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_dipole.add(conf, "pz", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+
+var f_quad = gui.addFolder("Quadrupole");
+f_quad.add(conf, "q11", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q12", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q13", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q22", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q23", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q_offset_x", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q_offset_y", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q_offset_z", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+
 gui.add(conf, "min_length", 1.0, 40.0, 0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "LC", 10.0, 30.0, 0.01).listen().onChange(update_fieldlines);
 gui.add(conf, "show_closed").listen();
@@ -289,22 +301,24 @@ conf.resetView = function() {
 gui.add(conf, "clear");
 gui.add(conf, "draw");
 gui.add(conf, "reseed");
-gui.add(conf, "resetView");
+
+var f_view = gui.addFolder("View");
+f_view.add(conf, "resetView");
 conf.look_x = function() {
   camera.position.set(80, 0, 0);
   controls.update();
 }
-gui.add(conf, "look_x");
+f_view.add(conf, "look_x");
 conf.look_y = function() {
   camera.position.set(0, 80, 0);
   controls.update();
 }
-gui.add(conf, "look_y");
+f_view.add(conf, "look_y");
 conf.look_z = function() {
   camera.position.set(0, 0, 80);
   controls.update();
 }
-gui.add(conf, "look_z");
+f_view.add(conf, "look_z");
 
 var axis = new THREE.Geometry();
 axis.vertices.push(new THREE.Vector3(0, 0, -100));
