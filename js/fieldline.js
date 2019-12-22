@@ -74,11 +74,11 @@ var Config = function () {
   this.q11 = -0.6;
   this.q12 = 0.0;
   this.q13 = 0.0;
-  this.q22 = 0.0;
+  this.q22 = 0.5;
   this.q23 = -0.7;
   this.q_offset_x = 0.0;
   this.q_offset_y = 0.0;
-  this.q_offset_z = -0.35;
+  this.q_offset_z = -0.40;
   this.min_length = 15.0;
   this.LC = 20.0;
   this.show_closed = true;
@@ -184,7 +184,7 @@ function integrate_field_line(p0, dl, nmax, color1, color2) {
 //     field_lines.add(line);
 //   }
 // }
-var N = 8000;
+var N = 10000;
 var p0s = [];
 
 function gen_p0() {
