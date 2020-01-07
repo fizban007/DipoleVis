@@ -9,8 +9,6 @@ uniform highp sampler3D cubeTex;
 // function
 uniform highp sampler2D transferTex;
 uniform ivec3 volume_dims;
-uniform float tile_x;
-uniform float tile_y;
 // uniform vec3 starColor;
 // uniform float star_radius;
 // uniform int species;
