@@ -68,17 +68,20 @@ function quadrupole_field(q11, q12, q13, q22, q23, x, y, z) {
 }
 
 var Config = function () {
+  this.p0 = 0.15;
+  this.theta = 80.0;
   this.px = 0.0;
-  this.py = 0.3;
-  this.pz = 0.03;
-  this.q11 = -0.6;
+  this.py = this.p0 * Math.sin(this.theta*Math.PI/180.0);
+  this.pz = this.p0 * Math.cos(this.theta*Math.PI/180.0);
+  this.q11 = -0.39;
   this.q12 = 0.0;
   this.q13 = 0.0;
-  this.q22 = 0.5;
-  this.q23 = -0.7;
+  this.q22 = 0.4;
+  this.q23 = -0.88;
   this.q_offset_x = 0.0;
   this.q_offset_y = 0.0;
-  this.q_offset_z = -0.40;
+  this.q_offset_z = -0.16;
+  // this.q_offset_z = 0.0;
   this.min_length = 15.0;
   this.LC = 20.0;
   this.show_closed = true;
@@ -266,16 +269,26 @@ function update_fieldlines() {
 
 const gui = new GUI();
 var f_dipole = gui.addFolder("Dipole");
-f_dipole.add(conf, "px", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-f_dipole.add(conf, "py", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-f_dipole.add(conf, "pz", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_dipole.add(conf, "px", -1.0, 1.0, 0.001).listen().onChange(update_fieldlines);
+f_dipole.add(conf, "py", -1.0, 1.0, 0.001).listen().onChange(update_fieldlines);
+f_dipole.add(conf, "pz", -1.0, 1.0, 0.001).listen().onChange(update_fieldlines);
+f_dipole.add(conf, "p0", 0.0, 1.0, 0.001).listen().onChange(function() {
+  conf.py = conf.p0 * Math.sin(conf.theta*Math.PI/180.0);
+  conf.pz = conf.p0 * Math.cos(conf.theta*Math.PI/180.0);
+  update_fieldlines();
+});
+f_dipole.add(conf, "theta", 0.0, 180.0, 1.0).listen().onChange(function() {
+  conf.py = conf.p0 * Math.sin(conf.theta*Math.PI/180.0);
+  conf.pz = conf.p0 * Math.cos(conf.theta*Math.PI/180.0);
+  update_fieldlines();
+});
 
 var f_quad = gui.addFolder("Quadrupole");
-f_quad.add(conf, "q11", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-f_quad.add(conf, "q12", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-f_quad.add(conf, "q13", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-f_quad.add(conf, "q22", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
-f_quad.add(conf, "q23", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q11", -5.0, 5.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q12", -5.0, 5.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q13", -5.0, 5.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q22", -5.0, 5.0, 0.01).listen().onChange(update_fieldlines);
+f_quad.add(conf, "q23", -5.0, 5.0, 0.01).listen().onChange(update_fieldlines);
 f_quad.add(conf, "q_offset_x", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
 f_quad.add(conf, "q_offset_y", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
 f_quad.add(conf, "q_offset_z", -1.0, 1.0, 0.01).listen().onChange(update_fieldlines);
